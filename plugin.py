@@ -14,17 +14,32 @@
     </params>
 </plugin>
 """
+import math
 import Domoticz
+from pymodbus.client.sync import ModbusTcpClient
+
+class FairlandModbusClient:
+
+    def __init__(self, ip_address: str, port: int):
+        self._client = ModbusTcpClient(host=ip_address, port=port)
+
+    def get_outlet_temperature(self):
+        response = self._client.read_input_registers(address=4, count=1, unit=1)
+        degree = math.floor((response.registers[0] - 96) / 2) + 18
+        return f"{degree}.0"
 
 
 class BasePlugin:
     enabled = False
 
     def __init__(self):
+        self._client = None
         return
 
     def onStart(self):
         Domoticz.Log("onStart called")
+
+        self._client = FairlandModbusClient(ip_address=Parameters["Address"], port=Parameters["Port"])
 
         if len(Devices) == 0:
             Domoticz.Device(Name=f"Outlet Temperature", Unit=1, TypeName="Temperature", Used=1).Create()
@@ -56,8 +71,12 @@ class BasePlugin:
             Domoticz.Log("Could not update because devices list is 0")
             return
 
+        if self._client is None:
+            Domoticz.Log("Could not update values, because ModbusClient is not initialized")
+            return
+
         Devices[1].Update(nValue=0, sValue="35.0")
-        Devices[2].Update(nValue=0, sValue="40.0")
+        Devices[2].Update(nValue=0, sValue=self._client.get_outlet_temperature())
         Devices[3].Update(nValue=0, sValue="17.0")
         Devices[4].Update(nValue=0, sValue="19.0")
 
