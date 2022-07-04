@@ -153,7 +153,7 @@ class BasePlugin:
         Devices[3].Update(nValue=0, sValue=self._client.get_ambient_temperature())
         Devices[4].Update(nValue=0, sValue=self._client.get_heating_temperature())
         Devices[5].Update(nValue=0, sValue=self._client.get_speed_percentage())
-        Devices[6].Update(nValue=0, sValue=self._client.get_running_mode())
+        Devices[6].Update(nValue=0, sValue=f"{list(REVERSE_RUNNING_MODE_MAP.keys())[self._client.get_running_mode()]}")
 
 global _plugin
 _plugin = BasePlugin()
