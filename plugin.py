@@ -17,7 +17,7 @@
 """
 from typing import Callable
 
-from pymodbus.client.common import ReadHoldingRegistersResponse, ReadInputRegistersResponse
+from pymodbus.client.common import ReadCoilsResponse, ReadHoldingRegistersResponse, ReadInputRegistersResponse
 import Domoticz
 from pymodbus.client.sync import ModbusTcpClient
 
@@ -89,9 +89,18 @@ class FairlandModbusClient:
         self._client.write_register(address=1, value=new_mode_number, unit=1)
 
     def set_heating_temp(self, temperature: float):
+        Domoticz.Log(f"Setting device to heating temp {temperature}")
         register_value = (temperature - 18) * 2 + 96
         self._client.write_register(address=3, value=int(register_value), unit=1)
 
+    def turn_on_off(self, on: bool):
+        Domoticz.Log(f"Turning device {'on' if on else 'off'}")
+        self._client.write_coil(address=0, value=int(on), unit=1)
+
+    def get_on_off_state(self):
+        Domoticz.Log("Fetching on/off state")
+        response: ReadCoilsResponse = self._client.read_coils(address=0, count=1, unit=1)
+        return response.bits[0]
 
 
 class BasePlugin:
@@ -117,10 +126,10 @@ class BasePlugin:
             Domoticz.Device(Name=f"Outlet Temperature", Unit=1, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Inlet Temperature", Unit=2, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Ambient Temperature", Unit=3, TypeName="Temperature", Used=1).Create()
-            # Domoticz.Device(Name=f"Heating Temperature", Unit=4, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Heating Temperature", Unit=4, Type=242, Subtype=1, Used=1).Create()
             Domoticz.Device(Name=f"Running Speed", Unit=5, TypeName="Percentage", Used=1).Create()
             Domoticz.Device(Name=f"Running Mode", Unit=6, TypeName="Selector Switch", Options=OPTIONS, Image=7, Used=1).Create()
+            Domoticz.Device(Name=f"On/Off Switch", Unit=7, TypeName="Selector Switch", SwitchType=0, Image=15, Used=1).Create()
 
     def onStop(self):
         Domoticz.Log("onStop called")
@@ -171,6 +180,8 @@ class BasePlugin:
         Devices[4].Update(nValue=0, sValue=self._client.get_heating_temperature())
         Devices[5].Update(nValue=0, sValue=self._client.get_speed_percentage())
         Devices[6].Update(nValue=0, sValue=f"{list(REVERSE_RUNNING_MODE_MAP.keys())[self._client.get_running_mode()]}")
+        on_off = self._client.get_on_off_state()
+        Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
 
 global _plugin
 _plugin = BasePlugin()
