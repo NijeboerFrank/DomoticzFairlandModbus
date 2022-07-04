@@ -85,7 +85,7 @@ class FairlandModbusClient:
             return
         new_mode = RUNNING_MODE_MAPPING.get(new_mode_number)
         Domoticz.Log(f"Setting device to mode {mode} ({new_mode})")
-        # self._client.write_register(address=1, value=new_mode_number)
+        self._client.write_register(address=1, value=new_mode_number)
 
 
 class BasePlugin:
@@ -126,6 +126,10 @@ class BasePlugin:
 
     def onCommand(self, Unit, Command, Level, Hue):
         Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Parameter '" + str(Command) + "', Level: " + str(Level))
+
+        if self._client is None:
+            Domoticz.Log("Could not update values, because ModbusClient is not initialized")
+            return
 
         if Unit==6:
             Domoticz.Log("Received Set Running Mode command")
