@@ -4,23 +4,13 @@
 # Author: GizMoCuz
 #
 """
-<plugin key="BasePlug" name="Basic Python Plugin Example" author="gizmocuz" version="1.0.0" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://www.google.com/">
+<plugin key="DomoticzFairlandModbus" name="Fairland Modbus" author="NijeboerFrank" version="0.1.0" wikilink="https://github.com/NijeboerFrank/DomoticzFairlandModbus/wiki">
     <description>
-        <h2>Plugin Title</h2><br/>
-        Overview...
-        <h3>Features</h3>
-        <ul style="list-style-type:square">
-            <li>Feature one...</li>
-            <li>Feature two...</li>
-        </ul>
-        <h3>Devices</h3>
-        <ul style="list-style-type:square">
-            <li>Device Type - What it does...</li>
-        </ul>
-        <h3>Configuration</h3>
-        Configuration options...
+        <h2>Domoticz Fairland Modbus</h2><br/>
     </description>
     <params>
+      <param field="Address" label="IP Address" />
+      <param field="Port" label="Port Number" />
     </params>
 </plugin>
 """
