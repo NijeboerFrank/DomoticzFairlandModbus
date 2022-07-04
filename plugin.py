@@ -86,7 +86,7 @@ class FairlandModbusClient:
         new_mode = RUNNING_MODE_MAPPING.get(new_mode_number)
         Domoticz.Log(f"Setting device to mode {mode} ({new_mode})")
         Domoticz.Log(f"Writing {new_mode_number} on address 1")
-        self._client.write_register(address=1, value=new_mode_number)
+        self._client.write_register(address=1, value=new_mode_number, unit=1)
 
 
 class BasePlugin:
