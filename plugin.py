@@ -22,12 +22,11 @@ import Domoticz
 from pymodbus.client.sync import ModbusTcpClient
 
 RUNNING_MODE_MAPPING = {
-    0: "Smart",
-    1: "Silent",
-    2: "Super Silent",
-    3: "Turbo",
+    "0": "Smart",
+    "1": "Silent",
+    "2": "Super Silent",
+    "3": "Turbo",
 }
-
 
 class FairlandModbusClient:
 
@@ -63,7 +62,7 @@ class FairlandModbusClient:
     def get_running_mode(self):
         Domoticz.Log("Getting running mode")
         response: ReadHoldingRegistersResponse = self._client.read_holding_registers(address=1, count=1, unit=1)
-        return RUNNING_MODE_MAPPING.get(response.registers[0])
+        return RUNNING_MODE_MAPPING.get(str(response.registers[0]))
 
 
 class BasePlugin:
@@ -91,7 +90,7 @@ class BasePlugin:
             Domoticz.Device(Name=f"Ambient Temperature", Unit=3, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Heating Temperature", Unit=4, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Running Speed", Unit=5, TypeName="Percentage", Used=1).Create()
-            Domoticz.Device(Name=f"Running Mode", Unit=6, TypeName="Selector Switch", Options=RUNNING_MODE_MAPPING.values(), Used=1).Create()
+            Domoticz.Device(Name=f"Running Mode", Unit=6, TypeName="Selector Switch", Options={v: k for k, v in RUNNING_MODE_MAPPING.items()}, Used=1).Create()
 
     def onStop(self):
         Domoticz.Log("onStop called")
@@ -121,8 +120,8 @@ class BasePlugin:
             Domoticz.Log("Could not update values, because ModbusClient is not initialized")
             return
 
-        Devices[1].Update(nValue=0, sValue=self._client.get_inlet_temperature())
-        Devices[2].Update(nValue=0, sValue=self._client.get_outlet_temperature())
+        Devices[1].Update(nValue=0, sValue=self._client.get_outlet_temperature())
+        Devices[2].Update(nValue=0, sValue=self._client.get_inlet_temperature())
         Devices[3].Update(nValue=0, sValue=self._client.get_ambient_temperature())
         Devices[4].Update(nValue=0, sValue=self._client.get_heating_temperature())
         Devices[5].Update(nValue=0, sValue=self._client.get_speed_percentage())
