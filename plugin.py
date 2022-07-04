@@ -54,7 +54,7 @@ class BasePlugin:
         if len(Devices) == 0:
             return
 
-        Devices[1].Update(nvalue=0, svalue="35.0")
+        Devices[1].Update(nValue=0, sValue="35.0")
 
 global _plugin
 _plugin = BasePlugin()
