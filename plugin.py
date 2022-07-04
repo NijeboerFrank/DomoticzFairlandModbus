@@ -157,6 +157,12 @@ class BasePlugin:
             self._client.set_heating_temp(float(Level))
             Devices[4].Update(nValue=0, sValue=self._client.get_heating_temperature())
 
+        elif Unit==7:
+            Domoticz.Log("Received turn on/off command")
+            turn_on = Level > 0
+            self._client.turn_on_off(on=turn_on)
+            on_off = self._client.get_on_off_state()
+            Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):
         Domoticz.Log("Notification: " + Name + "," + Subject + "," + Text + "," + Status + "," + str(Priority) + "," + Sound + "," + ImageFile)
