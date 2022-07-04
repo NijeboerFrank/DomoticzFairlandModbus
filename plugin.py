@@ -11,10 +11,12 @@
     <params>
       <param field="Address" label="IP Address" />
       <param field="Port" label="Port Number" />
+      <param field="Mode1" label="Pollrate" />
     </params>
 </plugin>
 """
 import math
+from typing import Callable
 import Domoticz
 from pymodbus.client.sync import ModbusTcpClient
 
@@ -24,9 +26,26 @@ class FairlandModbusClient:
         self._client = ModbusTcpClient(host=ip_address, port=port)
 
     def get_outlet_temperature(self):
-        response = self._client.read_input_registers(address=4, count=1, unit=1)
-        degree = math.floor((response.registers[0] - 96) / 2) + 18
-        return f"{degree}.0"
+        Domoticz.Log("Getting Outlet Temp")
+        return self.get_temp(4, self._client.read_input_registers)
+
+    def get_inlet_temperature(self):
+        Domoticz.Log("Getting Inlet Temp")
+        return self.get_temp(3, self._client.read_input_registers)
+
+    def get_ambient_temperature(self):
+        Domoticz.Log("Getting Ambient Temp")
+        return self.get_temp(5, self._client.read_input_registers)
+
+    def get_heating_temperature(self):
+        Domoticz.Log("Getting Heating Temp")
+        return self.get_temp(3, self._client.read_holding_registers)
+
+    def get_temp(self, address: int, function: Callable):
+        response = function(address=address, count=1, unit=1)
+        degree = ((response.registers[0] - 96) / 2) + 18
+        return f"{degree}"
+
 
 
 class BasePlugin:
@@ -38,6 +57,13 @@ class BasePlugin:
 
     def onStart(self):
         Domoticz.Log("onStart called")
+
+        try:
+            pollrate = int(Parameters["Mode1"])
+            Domoticz.Log(f"Setting pollrate to {pollrate}")
+            Domoticz.Heartbeat(int(pollrate))
+        except Exception as e:
+            Domoticz.Log(f"Could not set pollrate because of exception '{e}'")
 
         self._client = FairlandModbusClient(ip_address=Parameters["Address"], port=Parameters["Port"])
 
@@ -75,10 +101,10 @@ class BasePlugin:
             Domoticz.Log("Could not update values, because ModbusClient is not initialized")
             return
 
-        Devices[1].Update(nValue=0, sValue="35.0")
+        Devices[1].Update(nValue=0, sValue=self._client.get_inlet_temperature())
         Devices[2].Update(nValue=0, sValue=self._client.get_outlet_temperature())
-        Devices[3].Update(nValue=0, sValue="17.0")
-        Devices[4].Update(nValue=0, sValue="19.0")
+        Devices[3].Update(nValue=0, sValue=self._client.get_ambient_temperature())
+        Devices[4].Update(nValue=0, sValue=self._client.get_heating_temperature())
 
 global _plugin
 _plugin = BasePlugin()
