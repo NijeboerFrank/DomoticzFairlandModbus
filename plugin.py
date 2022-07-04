@@ -22,11 +22,18 @@ import Domoticz
 from pymodbus.client.sync import ModbusTcpClient
 
 RUNNING_MODE_MAPPING = {
-    "0": "Smart",
-    "1": "Silent",
-    "2": "Super Silent",
-    "3": "Turbo",
+    0: "Smart",
+    1: "Silent",
+    2: "Super Silent",
+    3: "Turbo",
 }
+
+OPTIONS = {
+    "LevelNames": "Smart|Silent|Super Silent|Turbo",
+    "LevelOffHidden": "true",
+    "SelectorStyle": "1",
+}
+
 
 class FairlandModbusClient:
 
@@ -62,7 +69,7 @@ class FairlandModbusClient:
     def get_running_mode(self):
         Domoticz.Log("Getting running mode")
         response: ReadHoldingRegistersResponse = self._client.read_holding_registers(address=1, count=1, unit=1)
-        return RUNNING_MODE_MAPPING.get(str(response.registers[0]))
+        return RUNNING_MODE_MAPPING.get(response.registers[0])
 
 
 class BasePlugin:
@@ -90,7 +97,7 @@ class BasePlugin:
             Domoticz.Device(Name=f"Ambient Temperature", Unit=3, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Heating Temperature", Unit=4, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Running Speed", Unit=5, TypeName="Percentage", Used=1).Create()
-            Domoticz.Device(Name=f"Running Mode", Unit=6, TypeName="Selector Switch", Options={v: k for k, v in RUNNING_MODE_MAPPING.items()}, Used=1).Create()
+            Domoticz.Device(Name=f"Running Mode", Unit=6, TypeName="Selector Switch", Options=OPTIONS, Image=7, Used=1).Create()
 
     def onStop(self):
         Domoticz.Log("onStop called")
