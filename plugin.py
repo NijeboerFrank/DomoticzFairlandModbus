@@ -27,10 +27,10 @@ class BasePlugin:
         Domoticz.Log("onStart called")
 
         if len(Devices) == 0:
-            Domoticz.Device(Name=f"{Parameters['Name']} - Outlet Temperature", Unit=1, TypeName="Temperature").Create()
-            Domoticz.Device(Name=f"{Parameters['Name']} - Inlet Temperature", Unit=2, TypeName="Temperature").Create()
-            Domoticz.Device(Name=f"{Parameters['Name']} - Ambient Temperature", Unit=3, TypeName="Temperature").Create()
-            Domoticz.Device(Name=f"{Parameters['Name']} - Heating Temperature", Unit=4, TypeName="Temperature").Create()
+            Domoticz.Device(Name=f"{Parameters['Name']} - Outlet Temperature", Unit=1, TypeName="Temperature", Used=1).Create()
+            Domoticz.Device(Name=f"{Parameters['Name']} - Inlet Temperature", Unit=2, TypeName="Temperature", Used=1).Create()
+            Domoticz.Device(Name=f"{Parameters['Name']} - Ambient Temperature", Unit=3, TypeName="Temperature", Used=1).Create()
+            Domoticz.Device(Name=f"{Parameters['Name']} - Heating Temperature", Unit=4, TypeName="Temperature", Used=1).Create()
 
     def onStop(self):
         Domoticz.Log("onStop called")
