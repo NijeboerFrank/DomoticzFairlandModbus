@@ -58,7 +58,7 @@ class FairlandModbusClient:
     def get_speed_percentage(self):
         Domoticz.Log("Getting Running Speed")
         response: ReadInputRegistersResponse = self._client.read_input_registers(address=0, count=1, unit=1)
-        return response.registers[0]
+        return f"{response.registers[0]}"
 
     def get_running_mode(self):
         Domoticz.Log("Getting running mode")
