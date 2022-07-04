@@ -30,7 +30,7 @@ RUNNING_MODE_MAPPING = {
 
 OPTIONS = {
     "LevelNames": "Off|Smart|Silent|Super Silent|Turbo",
-    "LevelOffHidden": "false",
+    "LevelOffHidden": "true",
     "SelectorStyle": "0",
 }
 
