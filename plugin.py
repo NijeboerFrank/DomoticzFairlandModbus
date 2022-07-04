@@ -27,9 +27,10 @@ class BasePlugin:
         Domoticz.Log("onStart called")
 
         if len(Devices) == 0:
-            unit = 1
-            Domoticz.Log(f"Creating new device with unit {unit}")
-            Domoticz.Device(Name=Parameters["Name"], Unit=1, TypeName="Temperature").Create()
+            Domoticz.Device(Name=f"{Parameters['Name']} - Outlet Temperature", Unit=1, TypeName="Temperature").Create()
+            Domoticz.Device(Name=f"{Parameters['Name']} - Inlet Temperature", Unit=2, TypeName="Temperature").Create()
+            Domoticz.Device(Name=f"{Parameters['Name']} - Ambient Temperature", Unit=3, TypeName="Temperature").Create()
+            Domoticz.Device(Name=f"{Parameters['Name']} - Heating Temperature", Unit=4, TypeName="Temperature").Create()
 
     def onStop(self):
         Domoticz.Log("onStop called")
@@ -52,9 +53,13 @@ class BasePlugin:
     def onHeartbeat(self):
         Domoticz.Log("onHeartbeat called")
         if len(Devices) == 0:
+            Domoticz.Log("Could not update because devices list is 0")
             return
 
         Devices[1].Update(nValue=0, sValue="35.0")
+        Devices[2].Update(nValue=0, sValue="40.0")
+        Devices[3].Update(nValue=0, sValue="17.0")
+        Devices[4].Update(nValue=0, sValue="19.0")
 
 global _plugin
 _plugin = BasePlugin()
