@@ -34,6 +34,13 @@ OPTIONS = {
     "SelectorStyle": "0",
 }
 
+REVERSE_RUNNING_MODE_MAP = {
+    10: 0,
+    20: 1,
+    30: 2,
+    40: 3,
+}
+
 
 class FairlandModbusClient:
 
@@ -70,6 +77,15 @@ class FairlandModbusClient:
         Domoticz.Log("Getting running mode")
         response: ReadHoldingRegistersResponse = self._client.read_holding_registers(address=1, count=1, unit=1)
         return RUNNING_MODE_MAPPING.get(response.registers[0])
+
+    def set_running_mode(self, mode: int):
+        new_mode_number = REVERSE_RUNNING_MODE_MAP.get(mode)
+        if new_mode_number is None:
+            Domoticz.Log(f"Invalid/unknown running mode {mode}")
+            return
+        new_mode = RUNNING_MODE_MAPPING.get(new_mode_number)
+        Domoticz.Log(f"Setting device to mode {mode} ({new_mode})")
+        # self._client.write_register(address=1, value=new_mode_number)
 
 
 class BasePlugin:
@@ -110,6 +126,11 @@ class BasePlugin:
 
     def onCommand(self, Unit, Command, Level, Hue):
         Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Parameter '" + str(Command) + "', Level: " + str(Level))
+
+        if Unit==6:
+            Domoticz.Log("Received Set Running Mode command")
+            self._client.set_running_mode(Level)
+            Devices[6].Update(nValue=0, sValue=self._client.get_running_mode())
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):
         Domoticz.Log("Notification: " + Name + "," + Subject + "," + Text + "," + Status + "," + str(Priority) + "," + Sound + "," + ImageFile)
