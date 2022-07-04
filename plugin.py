@@ -129,7 +129,7 @@ class BasePlugin:
             Domoticz.Device(Name=f"Heating Temperature", Unit=4, Type=242, Subtype=1, Used=1).Create()
             Domoticz.Device(Name=f"Running Speed", Unit=5, TypeName="Percentage", Used=1).Create()
             Domoticz.Device(Name=f"Running Mode", Unit=6, TypeName="Selector Switch", Options=OPTIONS, Image=7, Used=1).Create()
-            Domoticz.Device(Name=f"On/Off Switch", Unit=7, TypeName="Selector Switch", SwitchType=0, Image=15, Used=1).Create()
+            Domoticz.Device(Name=f"On/Off Switch", Unit=7, TypeName="Selector Switch", Switchtype=0, Image=15, Used=1).Create()
 
     def onStop(self):
         Domoticz.Log("onStop called")
