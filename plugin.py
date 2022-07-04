@@ -15,17 +15,21 @@
 </plugin>
 """
 import Domoticz
-from Domoticz import Devices, Parameters
 
 
 class BasePlugin:
     enabled = False
+
     def __init__(self):
-        #self.var = 123
         return
 
     def onStart(self):
         Domoticz.Log("onStart called")
+
+        if len(Devices) == 0:
+            unit = 1
+            Domoticz.Log(f"Creating new device with unit {unit}")
+            Domoticz.Device(Name=Parameters["Name"], Unit=1, TypeName="Temperature").Create()
 
     def onStop(self):
         Domoticz.Log("onStop called")
@@ -47,6 +51,10 @@ class BasePlugin:
 
     def onHeartbeat(self):
         Domoticz.Log("onHeartbeat called")
+        if len(Devices) == 0:
+            return
+
+        Devices[1].Update(nvalue=0, svalue="35.0")
 
 global _plugin
 _plugin = BasePlugin()
