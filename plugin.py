@@ -17,9 +17,17 @@
 """
 from typing import Callable
 
-from pymodbus.client.common import ReadInputRegistersResponse
+from pymodbus.client.common import ReadHoldingRegistersResponse, ReadInputRegistersResponse
 import Domoticz
 from pymodbus.client.sync import ModbusTcpClient
+
+RUNNING_MODE_MAPPING = {
+    0: "Smart",
+    1: "Silent",
+    2: "Super Silent",
+    3: "Turbo",
+}
+
 
 class FairlandModbusClient:
 
@@ -48,9 +56,14 @@ class FairlandModbusClient:
         return f"{degree}"
 
     def get_speed_percentage(self):
+        Domoticz.Log("Getting Running Speed")
         response: ReadInputRegistersResponse = self._client.read_input_registers(address=0, count=1, unit=1)
         return response.registers[0]
 
+    def get_running_mode(self):
+        Domoticz.Log("Getting running mode")
+        response: ReadHoldingRegistersResponse = self._client.read_holding_registers(address=1, count=1, unit=1)
+        return RUNNING_MODE_MAPPING.get(response.registers[0])
 
 
 class BasePlugin:
@@ -78,6 +91,7 @@ class BasePlugin:
             Domoticz.Device(Name=f"Ambient Temperature", Unit=3, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Heating Temperature", Unit=4, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Running Speed", Unit=5, TypeName="Percentage", Used=1).Create()
+            Domoticz.Device(Name=f"Running Mode", Unit=6, TypeName="Text", Used=1).Create()
 
     def onStop(self):
         Domoticz.Log("onStop called")
@@ -112,6 +126,7 @@ class BasePlugin:
         Devices[3].Update(nValue=0, sValue=self._client.get_ambient_temperature())
         Devices[4].Update(nValue=0, sValue=self._client.get_heating_temperature())
         Devices[5].Update(nValue=0, sValue=self._client.get_speed_percentage())
+        Devices[6].Update(nValue=0, sValue=self._client.get_running_mode())
 
 global _plugin
 _plugin = BasePlugin()
