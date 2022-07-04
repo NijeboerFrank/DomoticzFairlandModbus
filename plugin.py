@@ -112,7 +112,8 @@ class BasePlugin:
             Domoticz.Device(Name=f"Outlet Temperature", Unit=1, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Inlet Temperature", Unit=2, TypeName="Temperature", Used=1).Create()
             Domoticz.Device(Name=f"Ambient Temperature", Unit=3, TypeName="Temperature", Used=1).Create()
-            Domoticz.Device(Name=f"Heating Temperature", Unit=4, TypeName="Temperature", Used=1).Create()
+            # Domoticz.Device(Name=f"Heating Temperature", Unit=4, TypeName="Temperature", Used=1).Create()
+            Domoticz.Device(Name=f"Heating Temperature", Unit=4, TypeName="Thermostat", SubType=1, Used=1).Create()
             Domoticz.Device(Name=f"Running Speed", Unit=5, TypeName="Percentage", Used=1).Create()
             Domoticz.Device(Name=f"Running Mode", Unit=6, TypeName="Selector Switch", Options=OPTIONS, Image=7, Used=1).Create()
 
