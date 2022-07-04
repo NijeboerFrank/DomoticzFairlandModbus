@@ -88,6 +88,11 @@ class FairlandModbusClient:
         Domoticz.Log(f"Writing {new_mode_number} on address 1")
         self._client.write_register(address=1, value=new_mode_number, unit=1)
 
+    def set_heating_temp(self, temperature: float):
+        register_value = (temperature - 18) * 2 + 96
+        self._client.write_register(address=3, value=int(register_value), unit=1)
+
+
 
 class BasePlugin:
     enabled = False
@@ -137,6 +142,12 @@ class BasePlugin:
             Domoticz.Log("Received Set Running Mode command")
             self._client.set_running_mode(Level)
             Devices[6].Update(nValue=0, sValue=f"{list(REVERSE_RUNNING_MODE_MAP.keys())[self._client.get_running_mode()]}")
+
+        elif Unit==4:
+            Domoticz.Log("Received Set Heating temp command")
+            self._client.set_heating_temp(float(Level))
+            Devices[4].Update(nValue=0, sValue=self._client.get_heating_temperature())
+
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):
         Domoticz.Log("Notification: " + Name + "," + Subject + "," + Text + "," + Status + "," + str(Priority) + "," + Sound + "," + ImageFile)
