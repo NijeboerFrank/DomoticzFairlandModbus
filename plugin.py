@@ -150,7 +150,7 @@ class BasePlugin:
         if Unit==6:
             Domoticz.Log("Received Set Running Mode command")
             self._client.set_running_mode(Level)
-            Devices[6].Update(nValue=1, sValue=f"{list(REVERSE_RUNNING_MODE_MAP.keys())[self._client.get_running_mode()]}")
+            Devices[6].Update(nValue=Devices[7].nValue, sValue=f"{list(REVERSE_RUNNING_MODE_MAP.keys())[self._client.get_running_mode()]}")
 
         elif Unit==4:
             Domoticz.Log("Received Set Heating temp command")
@@ -185,7 +185,7 @@ class BasePlugin:
         Devices[3].Update(nValue=0, sValue=self._client.get_ambient_temperature())
         Devices[4].Update(nValue=0, sValue=self._client.get_heating_temperature())
         Devices[5].Update(nValue=0, sValue=self._client.get_speed_percentage())
-        Devices[6].Update(nValue=1, sValue=f"{list(REVERSE_RUNNING_MODE_MAP.keys())[self._client.get_running_mode()]}")
+        Devices[6].Update(nValue=Devices[7].nValue, sValue=f"{list(REVERSE_RUNNING_MODE_MAP.keys())[self._client.get_running_mode()]}")
         on_off = self._client.get_on_off_state()
         Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
 
