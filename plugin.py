@@ -159,7 +159,7 @@ class BasePlugin:
 
         elif Unit==7:
             Domoticz.Log("Received turn on/off command")
-            turn_on = Level > 0
+            turn_on = (Parameter == 'on')
             self._client.turn_on_off(on=turn_on)
             on_off = self._client.get_on_off_state()
             Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
