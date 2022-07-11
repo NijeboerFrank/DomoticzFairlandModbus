@@ -75,7 +75,7 @@ ERROR_MESSAGE_MAP = {
     30: "PE Unknown Error",
     31: "PF Unknown Error",
     32: "F0 Unknown Error",
-    33: "F1 Compressor drive module failure", 
+    33: "F1 Compressor drive module failure",
     34: "F2 PFC module failure",
     35: "F3 Compressor start failure",
     36: "F4 Compressor running failure",
@@ -155,27 +155,15 @@ class FairlandModbusClient:
 
 
     def get_error_state(self):
-        indices=[]
         Domoticz.Log("Fetching Error State")
         response: ReadDiscreteInputsResponse = self._client.read_discrete_inputs(address=48, count=48, unit=1)
         indices = [index for index, v in enumerate(response.bits) if v == 1]
-        #indices.append(5)
-        
         return indices
 
     def get_wp_state(self):
-        returnbits=""
         Domoticz.Log("Fetching Device State")
         response: ReadDiscreteInputsResponse = self._client.read_discrete_inputs(address=0, count=48, unit=1)
-        indices = [index for index, v in enumerate(response.bits) if v == 1]
-        # indices.append(5)
-        for index, v in enumerate(response.bits):
-            if v : 
-                returnbits= returnbits + "1"
-            else: 
-                returnbits = returnbits + "0"
-        
-        return returnbits
+        return "".join(map(str, response.bits))
 
 
 class BasePlugin:
@@ -236,12 +224,10 @@ class BasePlugin:
 
         elif Unit==7:
             Domoticz.Log("Received turn on/off command")
-            if Command == "On" :
-                turn_on = 1
-            else :
-                turn_on = 0 
+            turn_on = (Parameter.lower() == 'on')
             self._client.turn_on_off(on=turn_on)
-            Devices[7].Update(nValue=turn_on, sValue=f"{turn_on}")
+            on_off = self._client.get_on_off_state()
+            Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):
         Domoticz.Log("Notification: " + Name + "," + Subject + "," + Text + "," + Status + "," + str(Priority) + "," + Sound + "," + ImageFile)
@@ -268,14 +254,14 @@ class BasePlugin:
         on_off = self._client.get_on_off_state()
         Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
 
-        ErrorNumbers = self._client.get_error_state()
-        if len(ErrorNumbers)==0:
-             Devices[8].Update(nValue=0, sValue="Running Normal")
-        for index, msg in enumerate(ErrorNumbers):
-            Devices[8].Update(nValue=0, sValue=f"{ERROR_MESSAGE_MAP.get(msg)}")
-    
+        error_numbers = self._client.get_error_state()
+        if len(error_numbers) == 0:
+            Devices[8].Update(nValue=0, sValue="Running Normal")
+        else:
+            Devices[8].Update(nValue=0, sValue=f"{' | '.join([ERROR_MESSAGE_MAP.get(error_number) for error_number in error_numbers])}")
+
         Devices[9].Update(nValue=0, sValue=f"{self._client.get_wp_state()}")
-        
+
 global _plugin
 _plugin = BasePlugin()
 
