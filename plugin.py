@@ -41,6 +41,57 @@ REVERSE_RUNNING_MODE_MAP = {
     40: 3,
 }
 
+ERROR_MESSAGE_MAP = {
+    0: "E0 Unknown Error",
+    1: "E1 Unknown Error",
+    2: "E2 Unknown Error",
+    3: "E3 No water protection",
+    4: "E4 Three phase sequence protection (three phase only)",
+    5: "E5 Power supply excesses operation range",
+    6: "E6 Excessive temp difference between inlet and outlet water(Insufficient water flow protection)",
+    7: "E7 Unknown Error",
+    8: "E8 Unknown Error",
+    9: "E9 Unknown Error",
+    10: "EA Evaporator overheat protection (only at cooling mode)",
+    11: "EB Anti-freezing reminder",
+    12: "EC Unknown Error",
+    13: "ED Ambient temperature too high or too low protection",
+    14: "EE Unknown Error",
+    15: "EF Unknown Error",
+    16: "P0 Controller communication failure",
+    17: "P1 Water inlet temp sensor failure",
+    18: "P2 Water outlet temp sensor failure",
+    19: "P3 Gas exhaust temp sensor failure",
+    20: "P4 Evaporator coil pipe temp sensor failure",
+    21: "P5 Gas return temp sensor failure",
+    22: "P6 Cooling coil pipe temp sensor failure",
+    23: "P7 Ambient temp sensor failure",
+    24: "P8 Cooling plate sensor failure",
+    25: "P9 Current sensor failure",
+    26: "PA Restart memory failure",
+    27: "PB Unknown Error",
+    28: "PC Unknown Error",
+    29: "PD Unknown Error",
+    30: "PE Unknown Error",
+    31: "PF Unknown Error",
+    32: "F0 Unknown Error",
+    33: "F1 Compressor drive module failure",
+    34: "F2 PFC module failure",
+    35: "F3 Compressor start failure",
+    36: "F4 Compressor running failure",
+    37: "F5 Inverter board over current protection",
+    38: "F6 Inverter board overheat protection",
+    39: "F7 Current protection",
+    40: "F8 Cooling plate overheat protection",
+    41: "F9 Fan motor failure",
+    42: "FA PFC module over current protection",
+    43: "FB Power filter plate No-power protection",
+    44: "FC Unknown Error",
+    45: "FD Unknown Error",
+    46: "FE Unknown Error",
+    47: "FF Unknown Error",
+}
+
 
 class FairlandModbusClient:
 
@@ -103,6 +154,18 @@ class FairlandModbusClient:
         return response.bits[0]
 
 
+    def get_error_state(self):
+        Domoticz.Log("Fetching Error State")
+        response: ReadDiscreteInputsResponse = self._client.read_discrete_inputs(address=48, count=48, unit=1)
+        indices = [index for index, v in enumerate(response.bits) if v == 1]
+        return indices
+
+    def get_wp_state(self):
+        Domoticz.Log("Fetching Device State")
+        response: ReadDiscreteInputsResponse = self._client.read_discrete_inputs(address=0, count=48, unit=1)
+        return "".join(map(str, response.bits))
+
+
 class BasePlugin:
     enabled = False
 
@@ -130,6 +193,8 @@ class BasePlugin:
             Domoticz.Device(Name=f"Running Speed", Unit=5, TypeName="Percentage", Used=1).Create()
             Domoticz.Device(Name=f"Running Mode", Unit=6, TypeName="Selector Switch", Options=OPTIONS, Image=7, Used=1).Create()
             Domoticz.Device(Name=f"On/Off Switch", Unit=7, TypeName="Selector Switch", Switchtype=0, Image=15, Used=1).Create()
+            Domoticz.Device(Name=f"Error Status", Unit=8, Type=243, Subtype=19, Used=1).Create()
+            Domoticz.Device(Name=f"Device Status", Unit=9, Type=243, Subtype=19, Used=1).Create()
 
     def onStop(self):
         Domoticz.Log("onStop called")
@@ -159,7 +224,7 @@ class BasePlugin:
 
         elif Unit==7:
             Domoticz.Log("Received turn on/off command")
-            turn_on = (Parameter == 'on')
+            turn_on = (Parameter.lower() == 'on')
             self._client.turn_on_off(on=turn_on)
             on_off = self._client.get_on_off_state()
             Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
@@ -188,6 +253,14 @@ class BasePlugin:
         Devices[6].Update(nValue=Devices[7].nValue, sValue=f"{list(REVERSE_RUNNING_MODE_MAP.keys())[self._client.get_running_mode()]}")
         on_off = self._client.get_on_off_state()
         Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
+
+        error_numbers = self._client.get_error_state()
+        if len(error_numbers) == 0:
+            Devices[8].Update(nValue=0, sValue="Running Normal")
+        else:
+            Devices[8].Update(nValue=0, sValue=f"{' | '.join([ERROR_MESSAGE_MAP.get(error_number) for error_number in error_numbers])}")
+
+        Devices[9].Update(nValue=0, sValue=f"{self._client.get_wp_state()}")
 
 global _plugin
 _plugin = BasePlugin()
