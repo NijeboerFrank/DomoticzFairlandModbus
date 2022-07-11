@@ -163,7 +163,7 @@ class FairlandModbusClient:
     def get_wp_state(self):
         Domoticz.Log("Fetching Device State")
         response: ReadDiscreteInputsResponse = self._client.read_discrete_inputs(address=0, count=48, unit=1)
-        return "".join(map(str, response.bits))
+        return "".join(map(str, map(int, response.bits)))
 
 
 class BasePlugin:
