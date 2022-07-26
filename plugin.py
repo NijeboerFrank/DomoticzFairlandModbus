@@ -274,31 +274,31 @@ class BasePlugin:
 
         # TODO: Make this less ugly
         outlet_temp = self._client.get_outlet_temperature()
-        if not outlet_temp:
+        if outlet_temp is None:
             return None
         Devices[1].Update(nValue=0, sValue=outlet_temp)
         inlet_temp = self._client.get_inlet_temperature()
-        if not inlet_temp:
+        if inlet_temp is None:
             return None
         Devices[2].Update(nValue=0, sValue=inlet_temp)
         ambient_temp = self._client.get_ambient_temperature
-        if not ambient_temp:
+        if ambient_temp is None:
             return None
         Devices[3].Update(nValue=0, sValue=ambient_temp)
         heating_temp = self._client.get_heating_temperature()
-        if not heating_temp:
+        if heating_temp is None:
             return None
         Devices[4].Update(nValue=0, sValue=heating_temp)
         speed_percentage = self._client.get_speed_percentage()
-        if not speed_percentage:
+        if speed_percentage is None:
             return None
         Devices[5].Update(nValue=0, sValue=speed_percentage)
         running_mode = self._client.get_running_mode()
-        if not running_mode:
+        if running_mode is None:
             return None
         Devices[6].Update(nValue=Devices[7].nValue, sValue=f"{list(REVERSE_RUNNING_MODE_MAP.keys())[running_mode]}")
         on_off = self._client.get_on_off_state()
-        if not on_off:
+        if on_off is None:
             return None
         Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
 
