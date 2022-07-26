@@ -251,7 +251,7 @@ class BasePlugin:
 
         elif Unit==7:
             Domoticz.Log("Received turn on/off command")
-            turn_on = (Parameter.lower() == 'on')
+            turn_on = (Command.lower() == 'on')
             self._client.turn_on_off(on=turn_on)
             on_off = self._client.get_on_off_state()
             Devices[7].Update(nValue=on_off, sValue=f"{on_off}")
@@ -308,7 +308,7 @@ class BasePlugin:
         if len(error_numbers) == 0:
             Devices[8].Update(nValue=0, sValue="Running Normal")
         else:
-            Devices[8].Update(nValue=0, sValue=f"{' | '.join([ERROR_MESSAGE_MAP.get(error_number) for error_number in error_numbers])}")
+            Devices[8].Update(nValue=0, sValue=f"{' : '.join([ERROR_MESSAGE_MAP.get(error_number) for error_number in error_numbers])}")
 
         wp_state = self._client.get_wp_state()
         if wp_state is None:
