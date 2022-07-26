@@ -311,6 +311,8 @@ class BasePlugin:
             Devices[8].Update(nValue=0, sValue=f"{' | '.join([ERROR_MESSAGE_MAP.get(error_number) for error_number in error_numbers])}")
 
         wp_state = self._client.get_wp_state()
+        if wp_state is None:
+            return None
         Devices[9].Update(nValue=0, sValue=f"{wp_state}")
 
 global _plugin
